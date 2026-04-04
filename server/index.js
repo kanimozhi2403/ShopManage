@@ -12,9 +12,14 @@ const taskRoutes = require('./routes/tasks');
 
 const app = express();
 
+const allowedOrigins = [
+  /^http:\/\/localhost:\d+$/,
+  /\.vercel\.app$/
+];
+
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
+    if (!origin || allowedOrigins.some(o => o.test(origin))) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
