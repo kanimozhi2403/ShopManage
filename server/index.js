@@ -16,18 +16,23 @@ const taskRoutes = require('./routes/tasks');
 
 const app = express();
 
-const allowedOrigins = [
-  /^http:\/\/localhost:\d+$/,
-  /\.vercel\.app$/
-];
-
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.some(o => o.test(origin))) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    // Allow localhost (development)
+    if (/^http:\/\/localhost:\d+$/.test(origin)) {
+      return callback(null, true);
     }
+
+    // Allow any Vercel domain
+    if (origin.includes('.vercel.app')) {
+      return callback(null, true);
+    }
+
+    console.error('CORS blocked for origin:', origin);
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true
 }));
