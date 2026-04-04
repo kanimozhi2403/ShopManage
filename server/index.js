@@ -1,6 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+const bcrypt = require('bcryptjs');
+const pool = require('./db');
 
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
@@ -46,8 +50,37 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Internal server error' });
 });
+// Auto-initialize database tables and seed admin user
+async function initializeDatabase() {
+  try {
+    // Run schema.sql to create tables
+    const schemaPath = path.join(__dirname, 'db', 'schema.sql');
+    const schema = fs.readFileSync(schemaPath, 'utf8');
+    await pool.query(schema);
+    console.log('✅ Database tables initialized');
+
+    // Check if admin exists, if not seed it
+    const { rows } = await pool.query("SELECT id FROM users WHERE email = 'admin@shop.com'");
+    if (rows.length === 0) {
+      const hash = await bcrypt.hash('admin123', 10);
+      await pool.query(
+        "INSERT INTO users (name, email, password_hash, role) VALUES ('Admin', 'admin@shop.com', $1, 'admin')",
+        [hash]
+      );
+      console.log('✅ Admin user created (admin@shop.com / admin123)');
+    } else {
+      console.log('✅ Admin user already exists');
+    }
+  } catch (err) {
+    console.error('❌ Database initialization error:', err.message);
+  }
+}
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+
+// Initialize DB then start server
+initializeDatabase().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
 });
