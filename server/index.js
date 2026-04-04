@@ -62,7 +62,12 @@ async function initializeDatabase() {
     const schemaPath = path.join(__dirname, 'db', 'schema.sql');
     const schema = fs.readFileSync(schemaPath, 'utf8');
     await pool.query(schema);
-    console.log('✅ Database tables initialized');
+    
+    // Run schema migrations for columns that might be missing in production database
+    await pool.query('ALTER TABLE sales ADD COLUMN IF NOT EXISTS customer_name VARCHAR(200);');
+    await pool.query('ALTER TABLE sales ADD COLUMN IF NOT EXISTS customer_phone VARCHAR(50);');
+    
+    console.log('✅ Database tables initialized and migrated');
 
     // Check if admin exists, if not seed it
     const { rows } = await pool.query("SELECT id FROM users WHERE email = 'admin@shop.com'");

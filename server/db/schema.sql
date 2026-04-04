@@ -36,6 +36,8 @@ CREATE TABLE IF NOT EXISTS sales (
   total NUMERIC(10,2) NOT NULL,
   discount NUMERIC(10,2) DEFAULT 0,
   payment_method VARCHAR(50) DEFAULT 'cash',
+  customer_name VARCHAR(200),
+  customer_phone VARCHAR(50),
   notes TEXT,
   created_at TIMESTAMP DEFAULT NOW()
 );
