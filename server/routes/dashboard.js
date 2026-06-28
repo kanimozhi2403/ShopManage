@@ -57,7 +57,7 @@ router.get('/insights', authenticate, requireAdmin, async (req, res) => {
     if (process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEY.includes('your_gemini_api_key')) {
       try {
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         const result = await model.generateContent(`Analyze shop revenue of ₹${revenue.toLocaleString('en-IN')}. Write a very short encouraging business insight (3 sentences max).`);
         return res.json({ insight: result.response.text() });
       } catch (e) {
