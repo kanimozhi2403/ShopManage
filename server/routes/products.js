@@ -70,7 +70,7 @@ router.post('/analyze-receipt', authenticate, requireAdmin, async (req, res) => 
     if (process.env.GEMINI_API_KEY && !process.env.GEMINI_API_KEY.includes('your_gemini_api_key')) {
       try {
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         const response = await model.generateContent([
           { inlineData: { data: imageBase64, mimeType: mimeType || 'image/jpeg' } },
           "Extract products from this receipt. For each: name, category, cost, stock_qty, unit, description, low_stock_threshold (or min_stock). JSON ONLY."
